@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		E673FDD42B907117002F2B7D /* Cytrus.swift in Sources */ = {isa = PBXBuildFile; fileRef = E673FDD32B907117002F2B7D /* Cytrus.swift */; };
+		E69039442B9D918000F6D78D /* coreaudio_sink.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E69039422B9D918000F6D78D /* coreaudio_sink.cpp */; };
 		E696F1E82B9072B10032EA73 /* aac_decoder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E696EDFC2B9072B10032EA73 /* aac_decoder.cpp */; };
 		E696F1E92B9072B10032EA73 /* decoder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E696EDFD2B9072B10032EA73 /* decoder.cpp */; };
 		E696F1EA2B9072B10032EA73 /* filter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E696EDFE2B9072B10032EA73 /* filter.cpp */; };
@@ -399,6 +400,7 @@
 /* Begin PBXFileReference section */
 		E673FDD02B907117002F2B7D /* libCytrus.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libCytrus.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		E673FDD32B907117002F2B7D /* Cytrus.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Cytrus.swift; sourceTree = "<group>"; };
+		E69039422B9D918000F6D78D /* coreaudio_sink.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = coreaudio_sink.cpp; sourceTree = "<group>"; };
 		E696EDFC2B9072B10032EA73 /* aac_decoder.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = aac_decoder.cpp; sourceTree = "<group>"; };
 		E696EDFD2B9072B10032EA73 /* decoder.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = decoder.cpp; sourceTree = "<group>"; };
 		E696EDFE2B9072B10032EA73 /* filter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = filter.cpp; sourceTree = "<group>"; };
@@ -880,6 +882,7 @@
 				E696EE0C2B9072B10032EA73 /* sink_details.cpp */,
 				E696EE0D2B9072B10032EA73 /* static_input.cpp */,
 				E696EE0E2B9072B10032EA73 /* time_stretch.cpp */,
+				E69039422B9D918000F6D78D /* coreaudio_sink.cpp */,
 			);
 			path = audio_core;
 			sourceTree = "<group>";
@@ -1983,8 +1986,8 @@
 				E696F3C62B90791F0032EA73 /* EmulationWindow_Apple.mm */,
 				E696F3C72B90791F0032EA73 /* EmulationWindow_Vulkan.h */,
 				E696F3C82B90791F0032EA73 /* EmulationWindow_Vulkan.mm */,
-				E696F3C92B90791F0032EA73 /* GraphicsContext_Apple.cpp */,
 				E696F3CA2B90791F0032EA73 /* GraphicsContext_Apple.h */,
+				E696F3C92B90791F0032EA73 /* GraphicsContext_Apple.cpp */,
 			);
 			path = EmulationWindow;
 			sourceTree = "<group>";
@@ -2001,8 +2004,8 @@
 		E696F3D12B90791F0032EA73 /* InputManager */ = {
 			isa = PBXGroup;
 			children = (
-				E696F3CF2B90791F0032EA73 /* InputManager.cpp */,
 				E696F3D02B90791F0032EA73 /* InputManager.h */,
+				E696F3CF2B90791F0032EA73 /* InputManager.cpp */,
 			);
 			path = InputManager;
 			sourceTree = "<group>";
@@ -2170,6 +2173,7 @@
 				E696F2E62B9072B10032EA73 /* elf.cpp in Sources */,
 				E696F2012B9072B10032EA73 /* error.cpp in Sources */,
 				E696F3422B9072B10032EA73 /* announce_room_json.cpp in Sources */,
+				E69039442B9D918000F6D78D /* coreaudio_sink.cpp in Sources */,
 				E696F2A22B9072B10032EA73 /* http_c.cpp in Sources */,
 				E696F3342B9072B10032EA73 /* shader_gen.cpp in Sources */,
 				E696F2DE2B9072B10032EA73 /* mii.cpp in Sources */,

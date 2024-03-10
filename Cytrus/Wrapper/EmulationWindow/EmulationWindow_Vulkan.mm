@@ -23,7 +23,7 @@ EmulationWindow_Vulkan::EmulationWindow_Vulkan(CA::MetalLayer* surface, std::sha
 void EmulationWindow_Vulkan::PollEvents() {};
 
 
-void EmulationWindow_Vulkan::OrientationChanged(UIInterfaceOrientation orientation) {
+void EmulationWindow_Vulkan::OrientationChanged(UIInterfaceOrientation orientation, CA::MetalLayer* surface) {
     is_portrait = orientation == UIInterfaceOrientationPortrait;
     
     OnSurfaceChanged(surface);
