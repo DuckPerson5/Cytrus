@@ -45,7 +45,7 @@ EmulationWindow_Apple::~EmulationWindow_Apple() {
 
 void EmulationWindow_Apple::OnSurfaceChanged(CA::MetalLayer* surface) {
     render_window = surface;
-
+    
     window_info.type = Frontend::WindowSystemType::MacOS;
     window_info.render_surface = surface;
     window_info.render_surface_scale = [[UIScreen mainScreen] nativeScale];

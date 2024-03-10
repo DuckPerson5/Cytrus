@@ -16,7 +16,7 @@ public:
     
     void PollEvents() override;
     
-    void OrientationChanged(UIInterfaceOrientation orientation);
+    void OrientationChanged(UIInterfaceOrientation orientation, CA::MetalLayer* surface);
     
     std::unique_ptr<Frontend::GraphicsContext> CreateSharedContext() const override;
 private:

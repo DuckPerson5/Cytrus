@@ -47,31 +47,41 @@ typedef NS_ENUM(NSUInteger, VirtualControllerButtonType) {
 
 //
 
+typedef NS_ENUM(NSUInteger, KeyboardButtonConfig) {
+    KeyboardButtonConfigSingle,
+    KeyboardButtonConfigDual,
+    KeyboardButtonConfigTriple,
+    KeyboardButtonConfigNone
+};
+
 @interface KeyboardConfig : NSObject
 @property (nonatomic, strong) NSString *hintText;
+@property (nonatomic, assign) KeyboardButtonConfig buttonConfig;
 
--(KeyboardConfig *) initWithHintText:(NSString *)hintText;
+-(KeyboardConfig *) initWithHintText:(NSString *)hintText buttonConfig:(KeyboardButtonConfig)buttonConfig;
 @end
 
 //
 
 
 @interface CytrusObjC : NSObject {
-    CGSize size;
+    CGSize _size;
 }
 
 @property (nonatomic, strong) GameInformation *gameInformation;
 
 +(CytrusObjC *) sharedInstance NS_SWIFT_NAME(shared());
--(void) configureLayer:(CAMetalLayer *)layer NS_SWIFT_NAME(configure(layer:));
+-(void) configureLayer:(CAMetalLayer *)layer withSize:(CGSize)size NS_SWIFT_NAME(configure(layer:with:));
 -(void) insertGame:(NSURL *)url NS_SWIFT_NAME(insert(game:));
 -(void) step;
 
--(void) orientationChanged:(UIInterfaceOrientation)orientation;
+-(void) orientationChanged:(UIInterfaceOrientation)orientation forSurface:(CAMetalLayer *)surface NS_SWIFT_NAME(orientationChanged(orientation:for:));
 
 -(void) touchBeganAtPoint:(CGPoint)point;
 -(void) touchEnded;
 -(void) touchMovedAtPoint:(CGPoint)point;
+
+-(void) thumbstickMoved:(VirtualControllerButtonType)button x:(CGFloat)x y:(CGFloat)y;
 
 -(void) virtualControllerButtonDown:(VirtualControllerButtonType)button;
 -(void) virtualControllerButtonUp:(VirtualControllerButtonType)button;

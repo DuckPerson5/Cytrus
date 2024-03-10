@@ -30,15 +30,16 @@ namespace SoftwareKeyboard {
 class Keyboard final : public Frontend::SoftwareKeyboard {
 public:
     ~Keyboard();
-
+    
     void Execute(const Frontend::KeyboardConfig& config) override;
     void ShowError(const std::string& error) override;
     
     void KeyboardText(std::condition_variable& cv);
-    std::string GetKeyboardText(const Frontend::KeyboardConfig& config);
+    std::pair<std::string, uint8_t> GetKeyboardText(const Frontend::KeyboardConfig& config);
     
 private:
-    __block NSString *keyboardText;
+    __block NSString *_Nullable keyboardText = @"";
+    __block uint8_t buttonPressed = 0;
 };
 
 } // namespace SoftwareKeyboard
@@ -47,9 +48,10 @@ private:
 //
 
 @implementation KeyboardConfig
--(KeyboardConfig *)initWithHintText:(NSString *)hintText {
+-(KeyboardConfig *) initWithHintText:(NSString *)hintText buttonConfig:(KeyboardButtonConfig)buttonConfig {
     if (self = [super init]) {
         self.hintText = hintText;
+        self.buttonConfig = buttonConfig;
     } return self;
 }
 @end
@@ -61,8 +63,12 @@ Keyboard::~Keyboard() = default;
 void Keyboard::Execute(const Frontend::KeyboardConfig& config) {
     SoftwareKeyboard::Execute(config);
     
-    printf("config = %u, %u\n", config.accept_mode, config.button_config);
-    Finalize(this->GetKeyboardText(config), 1);
+    std::pair<std::string, uint8_t> it = this->GetKeyboardText(config);
+    if (this->config.button_config != Frontend::ButtonConfig::None)
+        it.second = static_cast<uint8_t>(this->config.button_config);
+    
+    NSLog(@"%s, %hhu", it.first.c_str(), it.second);
+    Finalize(it.first, it.second);
 }
 
 void Keyboard::ShowError(const std::string& error) {
@@ -72,23 +78,28 @@ void Keyboard::ShowError(const std::string& error) {
 void Keyboard::KeyboardText(std::condition_variable& cv) {
     [[NSNotificationCenter defaultCenter] addObserverForName:@"closeKeyboard" object:NULL queue:[NSOperationQueue mainQueue]
                                                   usingBlock:^(NSNotification *notification) {
-        this->keyboardText = (NSString *)notification.object;
+        this->buttonPressed = (NSUInteger)notification.userInfo[@"buttonPressed"];
+        
+        NSString *_Nullable text = notification.userInfo[@"keyboardText"];
+        if (text != NULL)
+            this->keyboardText = text;
+        
         cv.notify_all();
     }];
 }
 
-std::string Keyboard::GetKeyboardText(const Frontend::KeyboardConfig& config) {
+std::pair<std::string, uint8_t> Keyboard::GetKeyboardText(const Frontend::KeyboardConfig& config) {
     std::mutex mutex;
     std::condition_variable conditional_variable;
     
-    [[NSNotificationCenter defaultCenter] postNotification:[NSNotification notificationWithName:@"limonOpenKeyboard"
-                                                                                         object:NULL]];
+    [[NSNotificationCenter defaultCenter] postNotification:[NSNotification notificationWithName:@"openKeyboard"
+                                                                                         object:[[KeyboardConfig alloc] initWithHintText:[NSString stringWithCString:config.hint_text.c_str() encoding:NSUTF8StringEncoding] buttonConfig:(KeyboardButtonConfig)config.button_config]]];
     
     auto t1 = std::async(&Keyboard::KeyboardText, this, std::ref(conditional_variable));
     std::unique_lock<std::mutex> lock(mutex);
     conditional_variable.wait(lock);
     
-    return std::string([this->keyboardText UTF8String]);
+    return std::make_pair([this->keyboardText UTF8String], this->buttonPressed);
 }
 }
 
@@ -117,8 +128,9 @@ std::unique_ptr<EmulationWindow_Vulkan> window;
         Settings::values.use_shader_jit.SetValue(false);
         Settings::values.shaders_accurate_mul.SetValue(true);
         Settings::values.graphics_api.SetValue(Settings::GraphicsAPI::Vulkan);
-        Settings::values.layout_option.SetValue(Settings::LayoutOption::MobilePortrait);
-        Settings::values.output_type.SetValue(AudioCore::SinkType::SDL2);
+        Settings::values.layout_option.SetValue(Settings::LayoutOption::MobileLandscape);
+        Settings::values.output_type.SetValue(AudioCore::SinkType::CoreAudio);
+        Settings::values.input_type.SetValue(AudioCore::InputType::OpenAL);
         cytrusEmulator.ApplySettings();
         Settings::LogSettings();
         
@@ -138,11 +150,11 @@ std::unique_ptr<EmulationWindow_Vulkan> window;
     return sharedInstance;
 }
 
--(void) configureLayer:(CAMetalLayer *)layer {
+-(void) configureLayer:(CAMetalLayer *)layer withSize:(CGSize)size {
     window = std::make_unique<EmulationWindow_Vulkan>((__bridge CA::MetalLayer *)layer,
-                                                           std::make_shared<Common::DynamicLibrary>(dlopen("@executable_path/Frameworks/libMoltenVK.dylib", RTLD_NOW)),
-                                                           false, layer.frame.size);
-    size = layer.frame.size;
+                                                      std::make_shared<Common::DynamicLibrary>(dlopen("@executable_path/Frameworks/libMoltenVK.dylib", RTLD_NOW)),
+                                                      false, size);
+    _size = size;
     
     window->MakeCurrent();
 }
@@ -155,14 +167,14 @@ std::unique_ptr<EmulationWindow_Vulkan> window;
     void(cytrusEmulator.RunLoop());
 }
 
--(void) orientationChanged:(UIInterfaceOrientation)orientation {
-    
+-(void) orientationChanged:(UIInterfaceOrientation)orientation forSurface:(CAMetalLayer *)surface {
+    window->OrientationChanged(orientation, (__bridge CA::MetalLayer*)surface);
 }
 
 -(void) touchBeganAtPoint:(CGPoint)point {
     float h_ratio, w_ratio;
-    h_ratio = window->GetFramebufferLayout().height / (size.height * [[UIScreen mainScreen] nativeScale]);
-    w_ratio = window->GetFramebufferLayout().width / (size.width * [[UIScreen mainScreen] nativeScale]);
+    h_ratio = window->GetFramebufferLayout().height / (_size.height * [[UIScreen mainScreen] nativeScale]);
+    w_ratio = window->GetFramebufferLayout().width / (_size.width * [[UIScreen mainScreen] nativeScale]);
     
     window->TouchPressed((point.x) * [[UIScreen mainScreen] nativeScale] * w_ratio, ((point.y) * [[UIScreen mainScreen] nativeScale] * h_ratio));
 }
@@ -173,10 +185,14 @@ std::unique_ptr<EmulationWindow_Vulkan> window;
 
 -(void) touchMovedAtPoint:(CGPoint)point {
     float h_ratio, w_ratio;
-    h_ratio = window->GetFramebufferLayout().height / (size.height * [[UIScreen mainScreen] nativeScale]);
-    w_ratio = window->GetFramebufferLayout().width / (size.width * [[UIScreen mainScreen] nativeScale]);
+    h_ratio = window->GetFramebufferLayout().height / (_size.height * [[UIScreen mainScreen] nativeScale]);
+    w_ratio = window->GetFramebufferLayout().width / (_size.width * [[UIScreen mainScreen] nativeScale]);
     
     window->TouchMoved((point.x) * [[UIScreen mainScreen] nativeScale] * w_ratio, ((point.y) * [[UIScreen mainScreen] nativeScale] * h_ratio));
+}
+
+-(void) thumbstickMoved:(VirtualControllerButtonType)button x:(CGFloat)x y:(CGFloat)y {
+    InputManager::AnalogHandler()->MoveJoystick([[NSNumber numberWithUnsignedInteger:button] intValue], x, y);
 }
 
 -(void) virtualControllerButtonDown:(VirtualControllerButtonType)button {
