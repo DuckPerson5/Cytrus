@@ -80,7 +80,7 @@ public:
     bool prim_emit;
     bool winding;
     u32 output_mask;
-    Handlers* handlers;
+    std::unique_ptr<Handlers> handlers;
 
 private:
     friend class boost::serialization::access;

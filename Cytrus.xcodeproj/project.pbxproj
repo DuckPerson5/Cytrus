@@ -1733,29 +1733,6 @@
 			path = debug_utils;
 			sourceTree = "<group>";
 		};
-		E696F1A12B9072B10032EA73 /* format_reinterpreter */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = format_reinterpreter;
-			sourceTree = "<group>";
-		};
-		E696F1A22B9072B10032EA73 /* texture_filtering */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = texture_filtering;
-			sourceTree = "<group>";
-		};
-		E696F1A32B9072B10032EA73 /* host_shaders */ = {
-			isa = PBXGroup;
-			children = (
-				E696F1A12B9072B10032EA73 /* format_reinterpreter */,
-				E696F1A22B9072B10032EA73 /* texture_filtering */,
-			);
-			path = host_shaders;
-			sourceTree = "<group>";
-		};
 		E696F1AC2B9072B10032EA73 /* pica */ = {
 			isa = PBXGroup;
 			children = (
@@ -1859,7 +1836,6 @@
 			children = (
 				E696F19E2B9072B10032EA73 /* custom_textures */,
 				E696F1A02B9072B10032EA73 /* debug_utils */,
-				E696F1A32B9072B10032EA73 /* host_shaders */,
 				E696F1AC2B9072B10032EA73 /* pica */,
 				E696F1B22B9072B10032EA73 /* rasterizer_cache */,
 				E696F1B42B9072B10032EA73 /* renderer_software */,

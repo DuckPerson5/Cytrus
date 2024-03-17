@@ -24,6 +24,8 @@
 #include <map>
 
 #include "core/frontend/applets/swkbd.h"
+#include "video_core/gpu.h"
+#include "video_core/renderer_base.h"
 
 namespace SoftwareKeyboard {
 
@@ -123,14 +125,6 @@ std::unique_ptr<EmulationWindow_Vulkan> window;
         
         Config config;
         
-        Settings::values.async_shader_compilation.SetValue(true);
-        Settings::values.use_cpu_jit.SetValue(false);
-        Settings::values.use_shader_jit.SetValue(false);
-        Settings::values.shaders_accurate_mul.SetValue(true);
-        Settings::values.graphics_api.SetValue(Settings::GraphicsAPI::Vulkan);
-        Settings::values.layout_option.SetValue(Settings::LayoutOption::MobileLandscape);
-        Settings::values.output_type.SetValue(AudioCore::SinkType::CoreAudio);
-        Settings::values.input_type.SetValue(AudioCore::InputType::OpenAL);
         cytrusEmulator.ApplySettings();
         Settings::LogSettings();
         
@@ -152,7 +146,7 @@ std::unique_ptr<EmulationWindow_Vulkan> window;
 
 -(void) configureLayer:(CAMetalLayer *)layer withSize:(CGSize)size {
     window = std::make_unique<EmulationWindow_Vulkan>((__bridge CA::MetalLayer *)layer,
-                                                      std::make_shared<Common::DynamicLibrary>(dlopen("@executable_path/Frameworks/libMoltenVK.dylib", RTLD_NOW)),
+                                                      std::make_shared<Common::DynamicLibrary>(dlopen("@rpath/MoltenVK.framework/MoltenVK", RTLD_NOW)),
                                                       false, size);
     _size = size;
     
@@ -161,6 +155,12 @@ std::unique_ptr<EmulationWindow_Vulkan> window;
 
 -(void) insertGame:(NSURL *)url {
     void(cytrusEmulator.Load(*window, [url.path UTF8String]));
+    
+    std::atomic_bool stop_run;
+    cytrusEmulator.GPU().Renderer().Rasterizer()->LoadDiskResources(stop_run, [](VideoCore::LoadCallbackStage stage, std::size_t value, std::size_t total) {
+        LOG_DEBUG(Frontend, "Loading stage {} progress {} {}", static_cast<u32>(stage), value,
+                  total);
+    });
 }
 
 -(void) step {
@@ -191,8 +191,8 @@ std::unique_ptr<EmulationWindow_Vulkan> window;
     window->TouchMoved((point.x) * [[UIScreen mainScreen] nativeScale] * w_ratio, ((point.y) * [[UIScreen mainScreen] nativeScale] * h_ratio));
 }
 
--(void) thumbstickMoved:(VirtualControllerButtonType)button x:(CGFloat)x y:(CGFloat)y {
-    InputManager::AnalogHandler()->MoveJoystick([[NSNumber numberWithUnsignedInteger:button] intValue], x, y);
+-(void) thumbstickMoved:(VirtualControllerAnalogType)analog x:(CGFloat)x y:(CGFloat)y {
+    InputManager::AnalogHandler()->MoveJoystick([[NSNumber numberWithUnsignedInteger:analog] intValue], x, y);
 }
 
 -(void) virtualControllerButtonDown:(VirtualControllerButtonType)button {
@@ -201,5 +201,11 @@ std::unique_ptr<EmulationWindow_Vulkan> window;
 
 -(void) virtualControllerButtonUp:(VirtualControllerButtonType)button {
     InputManager::ButtonHandler()->ReleaseKey([[NSNumber numberWithUnsignedInteger:button] intValue]);
+}
+
+-(void) settingsSaved {
+    Config config;
+    cytrusEmulator.ApplySettings();
+    Settings::LogSettings();
 }
 @end

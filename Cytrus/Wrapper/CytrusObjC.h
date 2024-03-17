@@ -14,8 +14,20 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+typedef NS_ENUM(NSUInteger, VirtualControllerAnalogType) {
+    VirtualControllerAnalogTypeCirclePad = 713,
+    VirtualControllerAnalogTypeCirclePadUp = 714,
+    VirtualControllerAnalogTypeCirclePadDown = 715,
+    VirtualControllerAnalogTypeCirclePadLeft = 716,
+    VirtualControllerAnalogTypeCirclePadRight = 717,
+    VirtualControllerAnalogTypeCStick = 718,
+    VirtualControllerAnalogTypeCStickUp = 719,
+    VirtualControllerAnalogTypeCStickDown = 720,
+    VirtualControllerAnalogTypeCStickLeft = 771,
+    VirtualControllerAnalogTypeCStickRight = 772
+};
+
 typedef NS_ENUM(NSUInteger, VirtualControllerButtonType) {
-    // 3DS Controls
     VirtualControllerButtonTypeA = 700,
     VirtualControllerButtonTypeB = 701,
     VirtualControllerButtonTypeX = 702,
@@ -29,16 +41,6 @@ typedef NS_ENUM(NSUInteger, VirtualControllerButtonType) {
     VirtualControllerButtonTypeDirectionalPadDown = 710,
     VirtualControllerButtonTypeDirectionalPadLeft = 711,
     VirtualControllerButtonTypeDirectionalPadRight = 712,
-    VirtualControllerButtonTypeCirclePad = 713,
-    VirtualControllerButtonTypeCirclePadUp = 714,
-    VirtualControllerButtonTypeCirclePadDown = 715,
-    VirtualControllerButtonTypeCirclePadLeft = 716,
-    VirtualControllerButtonTypeCirclePadRight = 717,
-    VirtualControllerButtonTypeCStick = 718,
-    VirtualControllerButtonTypeCStickUp = 719,
-    VirtualControllerButtonTypeCStickDown = 720,
-    VirtualControllerButtonTypeCStickLeft = 771,
-    VirtualControllerButtonTypeCStickRight = 772,
     VirtualControllerButtonTypeTriggerL = 773,
     VirtualControllerButtonTypeTriggerR = 774,
     VirtualControllerButtonTypeDebug = 781,
@@ -81,10 +83,12 @@ typedef NS_ENUM(NSUInteger, KeyboardButtonConfig) {
 -(void) touchEnded;
 -(void) touchMovedAtPoint:(CGPoint)point;
 
--(void) thumbstickMoved:(VirtualControllerButtonType)button x:(CGFloat)x y:(CGFloat)y;
+-(void) thumbstickMoved:(VirtualControllerAnalogType)analog x:(CGFloat)x y:(CGFloat)y;
 
 -(void) virtualControllerButtonDown:(VirtualControllerButtonType)button;
 -(void) virtualControllerButtonUp:(VirtualControllerButtonType)button;
+
+-(void) settingsSaved;
 @end
 
 NS_ASSUME_NONNULL_END

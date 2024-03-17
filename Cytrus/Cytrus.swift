@@ -45,8 +45,8 @@ public struct Cytrus {
         cytrusObjC.touchMoved(at: point)
     }
     
-    public func thumbstickMoved(_ button: VirtualControllerButtonType, x: Float, y: Float) {
-        cytrusObjC.thumbstickMoved(button, x: CGFloat(x), y: CGFloat(y))
+    public func thumbstickMoved(_ analog: VirtualControllerAnalogType, x: Float, y: Float) {
+        cytrusObjC.thumbstickMoved(analog, x: CGFloat(x), y: CGFloat(y))
     }
     
     public func virtualControllerButtonDown(_ button: VirtualControllerButtonType) {
@@ -55,5 +55,9 @@ public struct Cytrus {
     
     public func virtualControllerButtonUp(_ button: VirtualControllerButtonType) {
         cytrusObjC.virtualControllerButtonUp(button)
+    }
+    
+    public func settingsSaved() {
+        cytrusObjC.settingsSaved()
     }
 }
