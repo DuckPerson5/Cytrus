@@ -19,10 +19,10 @@ public:
     void OrientationChanged(UIInterfaceOrientation orientation, CA::MetalLayer* surface);
     
     std::unique_ptr<Frontend::GraphicsContext> CreateSharedContext() const override;
-private:
-    bool CreateWindowSurface() override;
     
     CA::MetalLayer* surface;
+private:
+    bool CreateWindowSurface() override;
     
     std::shared_ptr<Common::DynamicLibrary> driver_library;
 };

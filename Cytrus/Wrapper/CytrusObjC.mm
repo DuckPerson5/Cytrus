@@ -108,7 +108,7 @@ std::pair<std::string, uint8_t> Keyboard::GetKeyboardText(const Frontend::Keyboa
 //
 
 Core::System& cytrusEmulator{Core::System::GetInstance()};
-std::unique_ptr<EmulationWindow_Vulkan> window;
+std::unique_ptr<EmulationWindow_Vulkan> window, window2;
 
 @implementation CytrusObjC
 -(CytrusObjC *) init {
@@ -144,17 +144,23 @@ std::unique_ptr<EmulationWindow_Vulkan> window;
     return sharedInstance;
 }
 
--(void) configureLayer:(CAMetalLayer *)layer withSize:(CGSize)size {
-    window = std::make_unique<EmulationWindow_Vulkan>((__bridge CA::MetalLayer *)layer,
+-(void) configurePrimaryLayer:(CAMetalLayer *)primaryLayer withPrimarySize:(CGSize)primarySize
+               secondaryLayer:(CAMetalLayer *)secondaryLayer withSecondarySize:(CGSize)secondarySize {
+    window = std::make_unique<EmulationWindow_Vulkan>((__bridge CA::MetalLayer *)primaryLayer,
                                                       std::make_shared<Common::DynamicLibrary>(dlopen("@rpath/MoltenVK.framework/MoltenVK", RTLD_NOW)),
-                                                      false, size);
-    _size = size;
+                                                      false, primarySize);
+    
+    window2 = std::make_unique<EmulationWindow_Vulkan>((__bridge CA::MetalLayer *)secondaryLayer,
+                                                      std::make_shared<Common::DynamicLibrary>(dlopen("@rpath/MoltenVK.framework/MoltenVK", RTLD_NOW)),
+                                                      true, secondarySize);
+    _size = secondarySize;
     
     window->MakeCurrent();
+    window2->MakeCurrent();
 }
 
 -(void) insertGame:(NSURL *)url {
-    void(cytrusEmulator.Load(*window, [url.path UTF8String]));
+    void(cytrusEmulator.Load(*window, [url.path UTF8String], window2.get()));
     
     std::atomic_bool stop_run;
     cytrusEmulator.GPU().Renderer().Rasterizer()->LoadDiskResources(stop_run, [](VideoCore::LoadCallbackStage stage, std::size_t value, std::size_t total) {
@@ -167,28 +173,31 @@ std::unique_ptr<EmulationWindow_Vulkan> window;
     void(cytrusEmulator.RunLoop());
 }
 
--(void) orientationChanged:(UIInterfaceOrientation)orientation forSurface:(CAMetalLayer *)surface {
-    window->OrientationChanged(orientation, (__bridge CA::MetalLayer*)surface);
+-(void) orientationChanged:(UIInterfaceOrientation)orientation with:(CGSize)secondaryScreenSize {
+    _size = secondaryScreenSize;
+    
+    window->OrientationChanged(orientation, window->surface);
+    window2->OrientationChanged(orientation, window2->surface);
 }
 
 -(void) touchBeganAtPoint:(CGPoint)point {
     float h_ratio, w_ratio;
-    h_ratio = window->GetFramebufferLayout().height / (_size.height * [[UIScreen mainScreen] nativeScale]);
-    w_ratio = window->GetFramebufferLayout().width / (_size.width * [[UIScreen mainScreen] nativeScale]);
+    h_ratio = window2->GetFramebufferLayout().height / (_size.height * [[UIScreen mainScreen] nativeScale]);
+    w_ratio = window2->GetFramebufferLayout().width / (_size.width * [[UIScreen mainScreen] nativeScale]);
     
-    window->TouchPressed((point.x) * [[UIScreen mainScreen] nativeScale] * w_ratio, ((point.y) * [[UIScreen mainScreen] nativeScale] * h_ratio));
+    window2->TouchPressed((point.x) * [[UIScreen mainScreen] nativeScale] * w_ratio, ((point.y) * [[UIScreen mainScreen] nativeScale] * h_ratio));
 }
 
 -(void) touchEnded {
-    window->TouchReleased();
+    window2->TouchReleased();
 }
 
 -(void) touchMovedAtPoint:(CGPoint)point {
     float h_ratio, w_ratio;
-    h_ratio = window->GetFramebufferLayout().height / (_size.height * [[UIScreen mainScreen] nativeScale]);
+    h_ratio = window2->GetFramebufferLayout().height / (_size.height * [[UIScreen mainScreen] nativeScale]);
     w_ratio = window->GetFramebufferLayout().width / (_size.width * [[UIScreen mainScreen] nativeScale]);
     
-    window->TouchMoved((point.x) * [[UIScreen mainScreen] nativeScale] * w_ratio, ((point.y) * [[UIScreen mainScreen] nativeScale] * h_ratio));
+    window2->TouchMoved((point.x) * [[UIScreen mainScreen] nativeScale] * w_ratio, ((point.y) * [[UIScreen mainScreen] nativeScale] * h_ratio));
 }
 
 -(void) thumbstickMoved:(VirtualControllerAnalogType)analog x:(CGFloat)x y:(CGFloat)y {

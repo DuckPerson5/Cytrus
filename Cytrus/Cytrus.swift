@@ -13,8 +13,8 @@ public struct Cytrus {
     
     fileprivate let cytrusObjC = CytrusObjC.shared()
     
-    public func configure(layer: CAMetalLayer, with size: CGSize) {
-        cytrusObjC.configure(layer: layer, with: size)
+    public func configure(primaryLayer: CAMetalLayer, with primarySize: CGSize, secondaryLayer: CAMetalLayer, secondarySize: CGSize) {
+        cytrusObjC.configure(primaryLayer: primaryLayer, primarySize: primarySize, secondaryLayer: secondaryLayer, secondarySize: secondarySize)
     }
     
     public func information(for url: URL) -> Information {
@@ -29,8 +29,8 @@ public struct Cytrus {
         cytrusObjC.step()
     }
     
-    public func orientationChanged(orientation: UIInterfaceOrientation, for surface: CAMetalLayer) {
-        cytrusObjC.orientationChanged(orientation: orientation, for: surface)
+    public func orientationChanged(orientation: UIInterfaceOrientation, with secondaryScreenSize: CGSize) {
+        cytrusObjC.orientationChanged(orientation: orientation, with: secondaryScreenSize)
     }
     
     public func touchBegan(at point: CGPoint) {

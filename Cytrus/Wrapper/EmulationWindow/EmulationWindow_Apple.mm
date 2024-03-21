@@ -82,6 +82,9 @@ void EmulationWindow_Apple::TryPresenting() {};
 
 
 void EmulationWindow_Apple::OnFramebufferSizeChanged() {
+    if (Settings::values.layout_option.GetValue() == Settings::LayoutOption::SeparateWindows)
+        is_portrait = false;
+    
     auto bigger{window_width > window_height ? window_width : window_height};
     auto smaller{window_width < window_height ? window_width : window_height};
     
