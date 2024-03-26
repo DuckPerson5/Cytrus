@@ -195,7 +195,7 @@ std::unique_ptr<EmulationWindow_Vulkan> window, window2;
 -(void) touchMovedAtPoint:(CGPoint)point {
     float h_ratio, w_ratio;
     h_ratio = window2->GetFramebufferLayout().height / (_size.height * [[UIScreen mainScreen] nativeScale]);
-    w_ratio = window->GetFramebufferLayout().width / (_size.width * [[UIScreen mainScreen] nativeScale]);
+    w_ratio = window2->GetFramebufferLayout().width / (_size.width * [[UIScreen mainScreen] nativeScale]);
     
     window2->TouchMoved((point.x) * [[UIScreen mainScreen] nativeScale] * w_ratio, ((point.y) * [[UIScreen mainScreen] nativeScale] * h_ratio));
 }

@@ -73,7 +73,7 @@ typedef NS_ENUM(NSUInteger, KeyboardButtonConfig) {
 @property (nonatomic, strong) GameInformation *gameInformation;
 
 +(CytrusObjC *) sharedInstance NS_SWIFT_NAME(shared());
--(void) configurePrimaryLayer:(CAMetalLayer *)layer withPrimarySize:(CGSize)size
+-(void) configurePrimaryLayer:(CAMetalLayer *)primaryLayer withPrimarySize:(CGSize)primarySize
                secondaryLayer:(CAMetalLayer *)secondaryLayer withSecondarySize:(CGSize)secondarySize NS_SWIFT_NAME(configure(primaryLayer:primarySize:secondaryLayer:secondarySize:));
 -(void) insertGame:(NSURL *)url NS_SWIFT_NAME(insert(game:));
 -(void) step;
